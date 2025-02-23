@@ -1,13 +1,28 @@
 package com.example.demo.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.dto.ResponseGameDto;
+import com.example.demo.service.GameService;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.*;
+
 
 @RestController
+@RequestMapping("/api")
 public class MainController {
 
-    @GetMapping("/api/main")
-    public String mainListener() {
-        return "Hello World";
+    @GetMapping("/game")
+    public ResponseGameDto nameOfGame(@RequestParam(defaultValue = "0") int id) {
+        String nameOfGame = GameService.getNameOfGame(id);
+        return new ResponseGameDto(nameOfGame, id);
+    }
+
+    @GetMapping("/user/{name}")
+    public Map<String, Object> userInfo(@PathVariable String name) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("name", name);
+        response.put("balance", 0);
+        return response;
     }
 }
