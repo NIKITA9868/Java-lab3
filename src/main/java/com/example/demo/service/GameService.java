@@ -1,16 +1,29 @@
 package com.example.demo.service;
 
+import com.example.demo.games.Game;
+import java.util.List;
+
 public class GameService {
 
     private GameService() {
     }
 
     public static String getNameOfGame(int id) {
-        return switch (id) {
-            case 1 -> "Black Jack";
-            case 2 -> "Roulette";
-            case 3 -> "Poker";
-            default -> "Not a valid game";
-        };
+
+        List<Game> games = List.of(
+                new Game(1, "Black Jack"),
+                new Game(2, "Roulette"),
+                new Game(3, "Poker")
+        );
+
+        return games.stream()
+                .filter(game -> game.getId() == id)
+                .map(Game::getName)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static boolean isIdValid(int id) {
+        return id > 0;
     }
 }
