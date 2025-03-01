@@ -6,11 +6,10 @@ import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepo;
 import com.example.demo.service.GameService;
 import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,21 +32,19 @@ public class MainController {
     private final UserRepo userRepo;
 
     @GetMapping("/game/{id}")
-    public ResponseEntity<?> getNameOfGame(@PathVariable int id) {
+    public ResponseGameDto getNameOfGame(@PathVariable int id) {
         if (!GameService.isIdValid(id)) {
-            return ResponseEntity.badRequest().body("Invalid game ID");
+            throw new IllegalArgumentException("Invalid game ID");
         }
-        try {
-            String nameOfGame = GameService.getNameOfGame(id);
-            if (nameOfGame == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
-            }
-            return ResponseEntity.ok(new ResponseGameDto(nameOfGame, id));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred");
+
+        String nameOfGame = GameService.getNameOfGame(id);
+        if (nameOfGame == null) {
+            throw new NoSuchElementException("Game not found");
         }
+
+        return new ResponseGameDto(nameOfGame, id);
     }
+
 
     @PostMapping("/user")
     public void addUser(@RequestBody User user) {
