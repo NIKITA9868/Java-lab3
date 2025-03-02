@@ -24,6 +24,6 @@ public class GameService {
     }
 
     public static boolean isIdNotValid(int id) {
-        return id >= 0;
+        return id <= 0;
     }
 }
