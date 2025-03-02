@@ -23,7 +23,7 @@ public class GameService {
                 .orElse(null);
     }
 
-    public static boolean isIdValid(int id) {
-        return id > 0;
+    public static boolean isIdNotValid(int id) {
+        return id >= 0;
     }
 }
