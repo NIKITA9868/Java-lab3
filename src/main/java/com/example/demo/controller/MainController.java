@@ -72,7 +72,7 @@ public class MainController {
                     .body(new ResponseUserDto("Invalid game ID", 0, id));
         }
         return userRepo.findById(id).map(user -> ResponseEntity
-                .ok(new ResponseUserDto(user.getName(), 0, user.getId())))
+                .ok(new ResponseUserDto(user.getName(), user.getBalance(), user.getId())))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ResponseUserDto("User not found", 0, id)));
     }
