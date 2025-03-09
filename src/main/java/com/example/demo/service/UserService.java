@@ -34,6 +34,12 @@ public class UserService {
                 .orElse(new ResponseUserDto("User not found", 0, id));
     }
 
+    public ResponseUserDto getUserByName(String name) {
+        User user = userRepo.findByName(name).orElse(new User());
+
+        return new ResponseUserDto(user.getName(), user.getBalance(), user.getId());
+    }
+
     public boolean doesntExistsById(int id) {
         return !userRepo.existsById(id);
     }
