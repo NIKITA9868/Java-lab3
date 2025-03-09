@@ -4,7 +4,6 @@ import com.example.demo.dto.ResponseGameDto;
 import com.example.demo.entity.Game;
 import com.example.demo.repository.GameRepo;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
@@ -12,8 +11,12 @@ import org.springframework.stereotype.Service;
 public class GameService {
 
 
-    @Autowired
-    private GameRepo gameRepo;
+
+    private final GameRepo gameRepo;
+
+    public GameService(GameRepo gameRepo) {
+        this.gameRepo = gameRepo;
+    }
 
     public boolean isIdNotValid(int id) {
         return id <= 0;
@@ -29,7 +32,7 @@ public class GameService {
 
     public ResponseGameDto getUserById(int id) {
         return gameRepo.findById(id)
-                .map(game -> new ResponseGameDto(game.getGame(), game.getId()))
+                .map(game -> new ResponseGameDto(game.getName(), game.getId()))
                 .orElse(new ResponseGameDto("User not found", id));
     }
 

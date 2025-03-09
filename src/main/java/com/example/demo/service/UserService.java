@@ -4,14 +4,17 @@ import com.example.demo.dto.ResponseUserDto;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepo;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepo userRepo;
+
+    private final UserRepo userRepo;
+
+    public UserService(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public boolean isIdNotValid(int id) {
         return id <= 0;

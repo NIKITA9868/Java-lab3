@@ -24,6 +24,6 @@ public class Game {
     private int id;
 
     @Column(unique = true)
-    private String game;
+    private String name;
 }
 

@@ -47,7 +47,7 @@ public class GameController {
 
     @PostMapping()
     public ResponseEntity<Game> addGame(@RequestBody Game game) {
-        if (game.getGame() == null || game.getGame().isEmpty()
+        if (game.getName() == null || game.getName().isEmpty()
                 || gameService.isIdNotValid(game.getId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(game);
         }
