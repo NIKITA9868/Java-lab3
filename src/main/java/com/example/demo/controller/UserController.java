@@ -18,15 +18,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/{name}")
-    public ResponseEntity<ResponseUserDto> getUserByName(@PathVariable String name) {
+    @GetMapping()
+    public ResponseEntity<ResponseUserDto> getUserByName(@RequestParam String name) {
 
         if (name == null || name.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -37,8 +37,8 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserByName(name));
     }
 
-    @GetMapping()
-    public ResponseEntity<ResponseUserDto> getUser(@RequestParam int id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseUserDto> getUser(@PathVariable int id) {
         if (userService.isIdNotValid(id)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseUserDto("Invalid game ID", 0, id));
@@ -67,8 +67,8 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
 
-    @DeleteMapping()
-    public ResponseEntity<Void> deleteUser(@RequestParam int id) {
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable int id) {
         if (userService.doesntExistsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

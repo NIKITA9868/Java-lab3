@@ -9,23 +9,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/game")
+@RequestMapping("/games")
 @RequiredArgsConstructor
 public class GameController {
 
     private final GameService gameService;
 
-    @GetMapping()
-    public ResponseEntity<ResponseGameDto> getGame(@RequestParam int id) {
+    @GetMapping("{id}")
+    public ResponseEntity<ResponseGameDto> getGame(@PathVariable int id) {
         if (gameService.isIdNotValid(id)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseGameDto("Invalid game ID", id));
@@ -56,8 +56,8 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedGame);
     }
 
-    @DeleteMapping()
-    public ResponseEntity<Void> deleteGame(@RequestParam int id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGame(@PathVariable int id) {
         if (gameService.doesntExistsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
