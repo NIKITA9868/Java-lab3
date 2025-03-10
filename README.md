@@ -1,106 +1,127 @@
-# Java-1
-# Game and User API
+# Demo Project API
 
 ## Описание
-Этот проект представляет собой Spring Boot API для управления играми и пользователями.
+Этот проект представляет собой REST API для управления пользователями и играми. API предоставляет CRUD-операции для работы с сущностями `User` и `Game`.
 
-## Функциональность
-- Получение названия игры по ID
-- Добавление нового пользователя
-- Получение списка всех пользователей
-- Получение информации о пользователе по ID
-- Удаление пользователя
-- Обновление данных пользователя
-
-## Требования
+### Требования
 - Java 17+
-- Maven 3+
-- PostgreSQL (или другая база данных, поддерживаемая Spring Data JPA)
+- Spring Boot
+- Maven
+- База данных (например, PostgreSQL или H2 для локальной разработки)
 
-## API Эндпоинты
+## API Документация
 
-### Получение названия игры по ID
-**GET** `/game/{id}`
+### UserController
+#### Получить пользователя по имени
+```http
+GET /user/{name}
+```
+**Ответы:**
+- `200 OK` - успешный ответ с данными пользователя
+- `400 BAD REQUEST` - некорректный запрос
+- `404 NOT FOUND` - пользователь не найден
 
-**Пример запроса:**
-```sh
-curl -X GET http://localhost:8080/game/1
+#### Получить пользователя по ID
+```http
+GET /user?id={id}
+```
+**Ответы:**
+- `200 OK` - успешный ответ с данными пользователя
+- `400 BAD REQUEST` - некорректный ID
+- `404 NOT FOUND` - пользователь не найден
+
+#### Получить всех пользователей
+```http
+GET /user/all
 ```
 **Ответ:**
-```json
+- `200 OK` - список пользователей
+
+#### Добавить пользователя
+```http
+POST /user
+Content-Type: application/json
 {
-  "name": "Game Name",
-  "id": 1
+  "name": "John Doe",
+  "age": 30
 }
 ```
+**Ответ:**
+- `201 CREATED` - пользователь успешно создан
+- `400 BAD REQUEST` - некорректные данные
 
-### Добавление нового пользователя
-**POST** `/user`
-
-**Пример запроса:**
-```sh
-curl -X POST http://localhost:8080/user -H "Content-Type: application/json" -d '{"name": "John Doe"}'
+#### Удалить пользователя
+```http
+DELETE /user?id={id}
 ```
 **Ответ:**
-```json
-{
-  "id": 1,
-  "name": "John Doe"
-}
-```
+- `204 NO CONTENT` - пользователь удалён
+- `404 NOT FOUND` - пользователь не найден
 
-### Получение списка всех пользователей
-**GET** `/users`
-
-**Пример запроса:**
-```sh
-curl -X GET http://localhost:8080/users
-```
-
-**Ответ:**
-```json
-[
-  { "name": "User1", "id": 1 },
-  { "name": "User2", "id": 2 }
-]
-```
-
-### Получение информации о пользователе по ID
-**GET** `/user?id={id}`
-
-**Пример запроса:**
-```sh
-curl -X GET "http://localhost:8080/user?id=1"
-```
-
-**Ответ:**
-```json
-{
-  "name": "User Name",
-  "id": 1
-}
-```
-
-### Удаление пользователя
-**DELETE** `/user?id={id}`
-
-**Пример запроса:**
-```sh
-curl -X DELETE "http://localhost:8080/user?id=1"
-```
-**Ответ:** HTTP 204 No Content
-
-### Обновление данных пользователя
-**PUT** `/user`
-
-**Пример запроса:**
-```sh
-curl -X PUT http://localhost:8080/user -H "Content-Type: application/json" -d '{"id": 1, "name": "John Updated"}'
-```
-**Ответ:**
-```json
+#### Обновить пользователя
+```http
+PUT /user
+Content-Type: application/json
 {
   "id": 1,
-  "name": "John Updated"
+  "name": "John Updated",
+  "age": 35
 }
 ```
+**Ответ:**
+- `200 OK` - пользователь обновлён
+- `404 NOT FOUND` - пользователь не найден
+
+---
+### GameController
+#### Получить игру по ID
+```http
+GET /game?id={id}
+```
+**Ответы:**
+- `200 OK` - успешный ответ с данными игры
+- `400 BAD REQUEST` - некорректный ID
+- `404 NOT FOUND` - игра не найдена
+
+#### Получить все игры
+```http
+GET /game/all
+```
+**Ответ:**
+- `200 OK` - список игр
+
+#### Добавить игру
+```http
+POST /game
+Content-Type: application/json
+{
+  "name": "Chess",
+  "id": 101
+}
+```
+**Ответ:**
+- `201 CREATED` - игра успешно создана
+- `400 BAD REQUEST` - некорректные данные
+
+#### Удалить игру
+```http
+DELETE /game?id={id}
+```
+**Ответ:**
+- `204 NO CONTENT` - игра удалена
+- `404 NOT FOUND` - игра не найдена
+
+#### Обновить игру
+```http
+PUT /game
+Content-Type: application/json
+{
+  "id": 101,
+  "name": "Updated Chess"
+}
+```
+**Ответ:**
+- `200 OK` - игра обновлена
+- `404 NOT FOUND` - игра не найдена
+
+

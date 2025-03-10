@@ -1,6 +1,5 @@
 package com.example.demo.controller;
 
-
 import com.example.demo.dto.ResponseUserDto;
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
@@ -18,16 +17,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
+
 public class UserController {
 
     private final UserService userService;
 
     @GetMapping("/{name}")
     public ResponseEntity<ResponseUserDto> getUserByName(@PathVariable String name) {
+
         if (name == null || name.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
