@@ -5,11 +5,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 @Entity
 @Table(name = "games")
@@ -25,5 +29,9 @@ public class Game {
 
     @Column(unique = true)
     private String name;
+
+    @ManyToMany
+    @JoinTable(name = "users_games_mapping")
+    private Set<User> users;
 }
 
