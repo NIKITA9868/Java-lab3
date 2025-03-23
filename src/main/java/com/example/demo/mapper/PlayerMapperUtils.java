@@ -12,6 +12,10 @@ import java.util.stream.Collectors;
 
 public class PlayerMapperUtils {
 
+    private PlayerMapperUtils() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     // Преобразование Player -> PlayerDto
     public static PlayerDto converttodto(Player player) {
         PlayerDto playerDto = new PlayerDto();

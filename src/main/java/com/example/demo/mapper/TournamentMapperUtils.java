@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 public class TournamentMapperUtils {
 
+    private TournamentMapperUtils() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     // Преобразование Tournament -> TournamentInfoDto
     public static TournamentInfoDto converttotournamentinfodto(Tournament tournament) {
         TournamentInfoDto tournamentInfoDto = new TournamentInfoDto();

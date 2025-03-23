@@ -10,18 +10,22 @@ import com.example.demo.repository.BetRepository;
 import com.example.demo.repository.PlayerRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class BetService {
 
-    @Autowired
-    private BetRepository betRepository;
 
-    @Autowired
-    private PlayerRepository playerRepository;
+    private final BetRepository betRepository;
+
+
+    private final PlayerRepository playerRepository;
+
+    public BetService(BetRepository betRepository, PlayerRepository playerRepository) {
+        this.betRepository = betRepository;
+        this.playerRepository = playerRepository;
+    }
 
     // Получить все ставки игрока по ID
     public List<BetDto> getBetsByPlayerId(Long playerId) {
