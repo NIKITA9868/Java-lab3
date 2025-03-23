@@ -7,7 +7,6 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.mapper.PlayerMapperUtils;
 import com.example.demo.repository.PlayerRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 
@@ -27,7 +26,7 @@ public class PlayerService {
     public List<PlayerDto> getAllPlayers() {
         return playerRepository.findAll().stream()
                 .map(PlayerMapperUtils::converttodto) // Используем статический метод
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Получить игрока по ID с его ставками

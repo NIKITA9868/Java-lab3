@@ -9,25 +9,29 @@ import com.example.demo.mapper.TournamentMapperUtils;
 import com.example.demo.repository.PlayerRepository;
 import com.example.demo.repository.TournamentRepository;
 import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class TournamentService {
 
-    @Autowired
-    private TournamentRepository tournamentRepository;
 
-    @Autowired
-    private PlayerRepository playerRepository;
+    private final TournamentRepository tournamentRepository;
+
+
+    private final PlayerRepository playerRepository;
+
+    public TournamentService(
+            TournamentRepository tournamentRepository, PlayerRepository playerRepository) {
+        this.tournamentRepository = tournamentRepository;
+        this.playerRepository = playerRepository;
+    }
 
     // Получить все турниры
     public List<TournamentDto> getAllTournaments() {
         return tournamentRepository.findAll().stream()
                 .map(TournamentMapperUtils::converttodto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Получить турнир по ID

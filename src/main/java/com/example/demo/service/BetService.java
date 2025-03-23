@@ -9,7 +9,6 @@ import com.example.demo.mapper.BetMapperUtils;
 import com.example.demo.repository.BetRepository;
 import com.example.demo.repository.PlayerRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 
@@ -36,7 +35,7 @@ public class BetService {
 
         return betRepository.findByPlayerId(playerId).stream()
                 .map(BetMapperUtils::converttobetdto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Создать новую ставку
