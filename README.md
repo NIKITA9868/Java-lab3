@@ -76,7 +76,7 @@ Content-Type: application/json
 ### GameController
 #### Получить игру по ID
 ```http
-GET /game?id={id}
+GET /bet?id={id}
 ```
 **Ответы:**
 - `200 OK` - успешный ответ с данными игры
@@ -85,14 +85,14 @@ GET /game?id={id}
 
 #### Получить все игры
 ```http
-GET /game/all
+GET /bet/all
 ```
 **Ответ:**
 - `200 OK` - список игр
 
 #### Добавить игру
 ```http
-POST /game
+POST /bet
 Content-Type: application/json
 {
   "name": "Chess",
@@ -105,7 +105,7 @@ Content-Type: application/json
 
 #### Удалить игру
 ```http
-DELETE /game?id={id}
+DELETE /bet?id={id}
 ```
 **Ответ:**
 - `204 NO CONTENT` - игра удалена
@@ -113,7 +113,7 @@ DELETE /game?id={id}
 
 #### Обновить игру
 ```http
-PUT /game
+PUT /bet
 Content-Type: application/json
 {
   "id": 101,
