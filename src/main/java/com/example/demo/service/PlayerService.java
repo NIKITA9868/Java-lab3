@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 public class PlayerService {
 
+    private static final String PLAYER_NOT_FOUND_MESSAGE = "Player not found with id: ";
 
     private final PlayerRepository playerRepository;
 
@@ -33,7 +34,7 @@ public class PlayerService {
     public PlayerDto getPlayerById(Long id) {
         Player player = playerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Player not found with id: " + id));
+                        PLAYER_NOT_FOUND_MESSAGE + id));
         return PlayerMapperUtils.converttodto(player); // Используем статический метод
     }
 
@@ -70,7 +71,7 @@ public class PlayerService {
 
         Player player = playerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Player not found with id: " + id));
+                        PLAYER_NOT_FOUND_MESSAGE + id));
         player.setName(playerDto.getName());
         player.setBalance(playerDto.getBalance());
         Player updatedPlayer = playerRepository.save(player);
@@ -81,7 +82,7 @@ public class PlayerService {
     public void deletePlayer(Long id) {
         // Проверяем, существует ли игрок
         if (!playerRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Player not found with id: " + id);
+            throw new ResourceNotFoundException(PLAYER_NOT_FOUND_MESSAGE + id);
         }
 
         playerRepository.deleteById(id);

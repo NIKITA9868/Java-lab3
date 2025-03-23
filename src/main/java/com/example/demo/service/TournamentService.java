@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TournamentService {
 
+    private static final String TOURNAMENT_NOT_FOUND_MESSAGE = "Tournament not found with id: ";
 
     private final TournamentRepository tournamentRepository;
 
@@ -38,7 +39,7 @@ public class TournamentService {
     public TournamentDto getTournamentById(Long id) {
         Tournament tournament = tournamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Tournament not found with id: " + id));
+                        TOURNAMENT_NOT_FOUND_MESSAGE + id));
         return TournamentMapperUtils.converttodto(tournament);
     }
 
@@ -75,7 +76,7 @@ public class TournamentService {
 
         Tournament tournament = tournamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Tournament not found with id: " + id));
+                        TOURNAMENT_NOT_FOUND_MESSAGE + id));
         tournament.setName(tournamentDto.getName());
         tournament.setPrizePool(tournamentDto.getPrizePool());
         Tournament updatedTournament = tournamentRepository.save(tournament);
@@ -86,7 +87,7 @@ public class TournamentService {
     public void deleteTournament(Long id) {
         // Проверяем, существует ли турнир
         if (!tournamentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Tournament not found with id: " + id);
+            throw new ResourceNotFoundException(TOURNAMENT_NOT_FOUND_MESSAGE + id);
         }
 
         tournamentRepository.deleteById(id);
@@ -96,7 +97,7 @@ public class TournamentService {
     public TournamentDto registerPlayer(Long tournamentId, Long playerId) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Tournament not found with id: " + tournamentId));
+                        TOURNAMENT_NOT_FOUND_MESSAGE + tournamentId));
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Player not found with id: " + playerId));
