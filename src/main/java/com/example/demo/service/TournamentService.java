@@ -89,7 +89,7 @@ public class TournamentService {
     public void deleteTournament(Long tournamentId) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Tournament not found with id: " + tournamentId));
+                        TOURNAMENT_NOT_FOUND_MESSAGE + tournamentId));
 
         // Удаляем все связи с игроками
         for (Player player : tournament.getPlayers()) {

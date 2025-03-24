@@ -13,7 +13,7 @@ public class GlobalExceptionHandler {
 
     // Обработка ResourceNotFoundException (404)
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<?> handleResourceNotFoundException(
+    public ResponseEntity<ErrorDetails> handleResourceNotFoundException(
             ResourceNotFoundException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(
                 new Date(), ex.getMessage(), request.getDescription(false));
@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
 
     // Обработка BadRequestException (400)
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> handleBadRequestException(
+    public ResponseEntity<ErrorDetails> handleBadRequestException(
             BadRequestException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(
                 new Date(), ex.getMessage(), request.getDescription(false));
@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
 
     // Обработка InsufficientBalanceException (409)
     @ExceptionHandler(InsufficientBalanceException.class)
-    public ResponseEntity<?> handleInsufficientBalanceException(
+    public ResponseEntity<ErrorDetails> handleInsufficientBalanceException(
             InsufficientBalanceException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(
                 new Date(), ex.getMessage(), request.getDescription(false));
