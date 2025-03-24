@@ -124,4 +124,27 @@ public class TournamentService {
 
         return TournamentMapperUtils.converttodto(tournament);
     }
+
+    @Transactional
+    public TournamentDto unregisterPlayer(Long tournamentId, Long playerId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        TOURNAMENT_NOT_FOUND_MESSAGE + tournamentId));
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Player not found with id: " + playerId));
+
+        // Проверяем, зарегистрирован ли игрок на турнир
+        if (!tournament.getPlayers().contains(player)) {
+            throw new BadRequestException("Player is not registered for the tournament");
+        }
+
+        tournament.getPlayers().remove(player);
+        player.getTournaments().remove(tournament);
+
+        tournamentRepository.save(tournament);
+        playerRepository.save(player);
+
+        return TournamentMapperUtils.converttodto(tournament);
+    }
 }

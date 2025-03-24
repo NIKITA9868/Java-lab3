@@ -70,4 +70,11 @@ public class TournamentController {
         TournamentDto tournament = tournamentService.registerPlayer(tournamentId, playerId);
         return ResponseEntity.ok(tournament);
     }
+
+    @PostMapping("/{tournamentId}/unregister/{playerId}")
+    public ResponseEntity<TournamentDto> unregisterPlayer(
+            @PathVariable Long tournamentId, @PathVariable Long playerId) {
+        TournamentDto tournament = tournamentService.unregisterPlayer(tournamentId, playerId);
+        return ResponseEntity.ok(tournament);
+    }
 }
