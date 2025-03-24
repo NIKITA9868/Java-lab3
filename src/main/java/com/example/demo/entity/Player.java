@@ -31,7 +31,6 @@ public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private double balance;
 
@@ -47,5 +46,4 @@ public class Player {
     )
     private Set<Tournament> tournaments = new HashSet<>();
 
-    // Геттеры и сеттеры
 }

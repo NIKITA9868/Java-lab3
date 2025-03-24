@@ -14,7 +14,4 @@ public class BetDto {
     private double amount;
     private Long playerId;
 
-
-
-    // Геттеры и сеттеры
 }

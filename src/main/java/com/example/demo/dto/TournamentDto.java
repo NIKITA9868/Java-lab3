@@ -18,5 +18,4 @@ public class TournamentDto {
     private double prizePool;
     private List<PlayerInfoDto> players; // Список ID игроков, участвующих в турнире
 
-    // Геттеры и сеттеры
 }
