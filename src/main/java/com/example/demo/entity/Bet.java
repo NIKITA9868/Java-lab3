@@ -29,5 +29,4 @@ public class Bet {
     private Player player;
 
 
-    // Геттеры и сеттеры
 }

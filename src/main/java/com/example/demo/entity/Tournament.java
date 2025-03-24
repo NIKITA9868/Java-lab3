@@ -29,7 +29,8 @@ public class Tournament {
     private String name;
     private double prizePool;
 
-    @ManyToMany(mappedBy = "tournaments")
+    @ManyToMany(mappedBy = "tournaments") // Используем mappedBy, так как Player - владелец связи
     private Set<Player> players = new HashSet<>();
-    // Геттеры и сеттеры
+
+
 }

@@ -38,7 +38,8 @@ public class Player {
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bet> bets = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.DETACH,
+        CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "player_tournament",
             joinColumns = @JoinColumn(name = "player_id"),

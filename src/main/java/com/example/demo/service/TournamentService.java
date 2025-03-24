@@ -10,6 +10,7 @@ import com.example.demo.repository.PlayerRepository;
 import com.example.demo.repository.TournamentRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -84,16 +85,24 @@ public class TournamentService {
     }
 
     // Удалить турнир
-    public void deleteTournament(Long id) {
-        // Проверяем, существует ли турнир
-        if (!tournamentRepository.existsById(id)) {
-            throw new ResourceNotFoundException(TOURNAMENT_NOT_FOUND_MESSAGE + id);
-        }
+    @Transactional
+    public void deleteTournament(Long tournamentId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Tournament not found with id: " + tournamentId));
 
-        tournamentRepository.deleteById(id);
+        // Удаляем все связи с игроками
+        for (Player player : tournament.getPlayers()) {
+            player.getTournaments().remove(tournament); // Удаляем турнир из списка игрока
+        }
+        tournament.getPlayers().clear(); // Очищаем список игроков у турнира
+
+        // Удаляем турнир
+        tournamentRepository.delete(tournament);
     }
 
     // Зарегистрировать игрока на турнир
+    @Transactional
     public TournamentDto registerPlayer(Long tournamentId, Long playerId) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new ResourceNotFoundException(

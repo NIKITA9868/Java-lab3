@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/players/{playerId}/bets")
-public class BetController {
+public class PersonalBetController {
 
 
     private final BetService betService;
 
-    public BetController(BetService betService) {
+    public PersonalBetController(BetService betService) {
         this.betService = betService;
     }
 

@@ -64,7 +64,7 @@ public class TournamentController {
     }
 
     // Зарегистрировать игрока на турнир
-    @PostMapping("/{tournamentId}/players/{playerId}")
+    @PostMapping("/{tournamentId}/register/{playerId}")
     public ResponseEntity<TournamentDto> registerPlayer(
             @PathVariable Long tournamentId, @PathVariable Long playerId) {
         TournamentDto tournament = tournamentService.registerPlayer(tournamentId, playerId);

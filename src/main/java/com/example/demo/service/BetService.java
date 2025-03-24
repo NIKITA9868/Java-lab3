@@ -26,6 +26,13 @@ public class BetService {
         this.playerRepository = playerRepository;
     }
 
+    public List<BetDto> getAllBets() {
+
+        return betRepository.findAll().stream()
+                .map(BetMapperUtils::converttobetdto)
+                .toList();
+    }
+
     // Получить все ставки игрока по ID
     public List<BetDto> getBetsByPlayerId(Long playerId) {
         // Проверяем, существует ли игрок
