@@ -2,72 +2,73 @@ package com.example.demo.service;
 
 import com.example.demo.dto.PlayerDto;
 import com.example.demo.entity.Player;
-import com.example.demo.exception.BadRequestException;
+import com.example.demo.entity.Tournament;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.mapper.PlayerMapperUtils;
 import com.example.demo.repository.PlayerRepository;
+import com.example.demo.repository.TournamentRepository;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 
 @Service
-
+@RequiredArgsConstructor
+@CacheConfig(cacheNames = {"players", "playersWithBets"})
 public class PlayerService {
 
     private static final String PLAYER_NOT_FOUND_MESSAGE = "Player not found with id: ";
-
     private final PlayerRepository playerRepository;
+    private final TournamentRepository tournamentRepository;
 
-    public PlayerService(PlayerRepository playerRepository) {
-        this.playerRepository = playerRepository;
+    @Cacheable(value = "bets", key = "'bets_' + #bets")
+    public List<PlayerDto> findPlayersWithBetsMoreThan(Long bets) {
+        List<PlayerDto> result = playerRepository.findPlayersWithBetsGreaterThan(bets)
+                .stream()
+                .map(PlayerMapperUtils::converttodto)
+                .toList();
+
+        if (result.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    String.format("No players found with bets more than %d", bets)
+            );
+        }
+
+        return result;
     }
 
-    // Получить всех игроков с их ставками
     public List<PlayerDto> getAllPlayers() {
         return playerRepository.findAll().stream()
-                .map(PlayerMapperUtils::converttodto) // Используем статический метод
+                .map(PlayerMapperUtils::converttodto)
                 .toList();
     }
 
-    // Получить игрока по ID с его ставками
+
     public PlayerDto getPlayerById(Long id) {
         Player player = playerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         PLAYER_NOT_FOUND_MESSAGE + id));
-        return PlayerMapperUtils.converttodto(player); // Используем статический метод
+        return PlayerMapperUtils.converttodto(player);
     }
 
-    // Создать нового игрока
-    public PlayerDto createPlayer(PlayerDto playerDto) {
-        // Проверяем, что имя игрока не пустое
-        if (playerDto.getName() == null || playerDto.getName().trim().isEmpty()) {
-            throw new BadRequestException("Player name cannot be empty");
-        }
 
-        // Проверяем, что баланс не отрицательный
-        if (playerDto.getBalance() < 0) {
-            throw new BadRequestException("Player balance cannot be negative");
-        }
+    public PlayerDto createPlayer(PlayerDto playerDto) {
 
         Player player = new Player();
         player.setName(playerDto.getName());
         player.setBalance(playerDto.getBalance());
         Player savedPlayer = playerRepository.save(player);
-        return PlayerMapperUtils.converttodto(savedPlayer); // Используем статический метод
+        return PlayerMapperUtils.converttodto(savedPlayer);
     }
 
-    // Обновить данные игрока
+    @CacheEvict(value = {"tournaments", "bets"}, allEntries = true)
     public PlayerDto updatePlayer(Long id, PlayerDto playerDto) {
-        // Проверяем, что имя игрока не пустое
-        if (playerDto.getName() == null || playerDto.getName().trim().isEmpty()) {
-            throw new BadRequestException("Player name cannot be empty");
-        }
 
-        // Проверяем, что баланс не отрицательный
-        if (playerDto.getBalance() < 0) {
-            throw new BadRequestException("Player balance cannot be negative");
-        }
 
         Player player = playerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -75,16 +76,24 @@ public class PlayerService {
         player.setName(playerDto.getName());
         player.setBalance(playerDto.getBalance());
         Player updatedPlayer = playerRepository.save(player);
-        return PlayerMapperUtils.converttodto(updatedPlayer); // Используем статический метод
+        return PlayerMapperUtils.converttodto(updatedPlayer);
     }
 
-    // Удалить игрока
-    public void deletePlayer(Long id) {
-        // Проверяем, существует ли игрок
-        if (!playerRepository.existsById(id)) {
-            throw new ResourceNotFoundException(PLAYER_NOT_FOUND_MESSAGE + id);
-        }
+    @Transactional
+    @CacheEvict(value = {"tournaments", "bets"}, allEntries = true)
+    public void deletePlayer(Long playerId) {
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Player not found with id: " + playerId));
 
-        playerRepository.deleteById(id);
+        List<Tournament> tournaments = tournamentRepository.findTournamentsByPlayerId(playerId);
+        tournaments.forEach(t -> t.getPlayers().remove(player));
+        tournamentRepository.saveAll(tournaments);
+
+        player.getTournaments().clear();
+        player.getBets().clear();
+        playerRepository.delete(player);
     }
+
+
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -30,6 +31,14 @@ public class PlayerController {
     @GetMapping
     public ResponseEntity<List<PlayerDto>> getAllPlayers() {
         List<PlayerDto> players = playerService.getAllPlayers();
+        return ResponseEntity.ok(players);
+    }
+
+    @GetMapping("/bets")
+    public ResponseEntity<List<PlayerDto>> getPlayersWithBets(
+            @RequestParam Long bets
+    ) {
+        List<PlayerDto> players = playerService.findPlayersWithBetsMoreThan(bets);
         return ResponseEntity.ok(players);
     }
 

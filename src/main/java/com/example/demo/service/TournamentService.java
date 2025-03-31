@@ -9,24 +9,34 @@ import com.example.demo.mapper.TournamentMapperUtils;
 import com.example.demo.repository.PlayerRepository;
 import com.example.demo.repository.TournamentRepository;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+@RequiredArgsConstructor
 @Service
 public class TournamentService {
 
     private static final String TOURNAMENT_NOT_FOUND_MESSAGE = "Tournament not found with id: ";
-
     private final TournamentRepository tournamentRepository;
-
-
     private final PlayerRepository playerRepository;
 
-    public TournamentService(
-            TournamentRepository tournamentRepository, PlayerRepository playerRepository) {
-        this.tournamentRepository = tournamentRepository;
-        this.playerRepository = playerRepository;
+    @Transactional
+    @Cacheable(value = "tournaments", key = "'player_' + #playerId")
+    public List<TournamentDto> getTournamentsByPlayerId(Long playerId) {
+        List<TournamentDto> tournaments = tournamentRepository.findTournamentsByPlayerId(playerId)
+               .stream()
+               .map(TournamentMapperUtils::converttodto)
+               .toList();
+
+        if (tournaments.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No tournaments found for player with id: " + playerId);
+        }
+        // Если нет в кэше, получаем из БД и кэшируем
+        return tournaments;
     }
 
     // Получить все турниры
@@ -63,7 +73,7 @@ public class TournamentService {
         return TournamentMapperUtils.converttodto(savedTournament);
     }
 
-    // Обновить турнир
+    @CacheEvict(value = "tournaments", allEntries = true)
     public TournamentDto updateTournament(Long id, TournamentDto tournamentDto) {
         // Проверяем, что название турнира не пустое
         if (tournamentDto.getName() == null || tournamentDto.getName().trim().isEmpty()) {
@@ -86,23 +96,27 @@ public class TournamentService {
 
     // Удалить турнир
     @Transactional
+    @CacheEvict(value = "tournaments", allEntries = true)
     public void deleteTournament(Long tournamentId) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         TOURNAMENT_NOT_FOUND_MESSAGE + tournamentId));
 
-        // Удаляем все связи с игроками
-        for (Player player : tournament.getPlayers()) {
-            player.getTournaments().remove(tournament); // Удаляем турнир из списка игрока
-        }
-        tournament.getPlayers().clear(); // Очищаем список игроков у турнира
 
-        // Удаляем турнир
+
+
+        // Удаляем связи
+        for (Player player : tournament.getPlayers()) {
+            player.getTournaments().remove(tournament);
+        }
+        tournament.getPlayers().clear();
+
         tournamentRepository.delete(tournament);
     }
 
     // Зарегистрировать игрока на турнир
     @Transactional
+    @CacheEvict(value = "tournaments", key = "'player_' + #playerId")
     public TournamentDto registerPlayer(Long tournamentId, Long playerId) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -111,7 +125,6 @@ public class TournamentService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Player not found with id: " + playerId));
 
-        // Проверяем, не зарегистрирован ли игрок уже на турнир
         if (tournament.getPlayers().contains(player)) {
             throw new BadRequestException("Player is already registered for the tournament");
         }
@@ -122,10 +135,13 @@ public class TournamentService {
         tournamentRepository.save(tournament);
         playerRepository.save(player);
 
+
+
         return TournamentMapperUtils.converttodto(tournament);
     }
 
     @Transactional
+    @CacheEvict(value = "tournaments", key = "'player_' + #playerId")
     public TournamentDto unregisterPlayer(Long tournamentId, Long playerId) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -134,7 +150,6 @@ public class TournamentService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Player not found with id: " + playerId));
 
-        // Проверяем, зарегистрирован ли игрок на турнир
         if (!tournament.getPlayers().contains(player)) {
             throw new BadRequestException("Player is not registered for the tournament");
         }
@@ -144,6 +159,8 @@ public class TournamentService {
 
         tournamentRepository.save(tournament);
         playerRepository.save(player);
+
+
 
         return TournamentMapperUtils.converttodto(tournament);
     }
