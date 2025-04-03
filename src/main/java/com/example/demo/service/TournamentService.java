@@ -24,16 +24,16 @@ public class TournamentService {
     private final PlayerRepository playerRepository;
 
     @Transactional
-    @Cacheable(value = "tournaments", key = "'player_' + #playerId")
-    public List<TournamentDto> getTournamentsByPlayerId(Long playerId) {
-        List<TournamentDto> tournaments = tournamentRepository.findTournamentsByPlayerId(playerId)
+    @Cacheable(value = "tournaments", key = "'player_' + #name")
+    public List<TournamentDto> getTournamentsByPlayerId(String name) {
+        List<TournamentDto> tournaments = tournamentRepository.findTournamentsByName(name)
                .stream()
                .map(TournamentMapperUtils::converttodto)
                .toList();
 
         if (tournaments.isEmpty()) {
             throw new ResourceNotFoundException(
-                    "No tournaments found for player with id: " + playerId);
+                    "No tournaments found for player with id: " + name);
         }
         // Если нет в кэше, получаем из БД и кэшируем
         return tournaments;

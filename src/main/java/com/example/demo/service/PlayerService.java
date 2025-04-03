@@ -86,7 +86,8 @@ public class PlayerService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Player not found with id: " + playerId));
 
-        List<Tournament> tournaments = tournamentRepository.findTournamentsByPlayerId(playerId);
+        List<Tournament> tournaments = tournamentRepository.findTournamentsByName(
+                player.getName());
         tournaments.forEach(t -> t.getPlayers().remove(player));
         tournamentRepository.saveAll(tournaments);
 

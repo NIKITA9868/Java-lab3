@@ -9,12 +9,16 @@ import org.springframework.data.repository.query.Param;
 
 
 public interface TournamentRepository extends JpaRepository<Tournament, Long> {
-    // Нативный запрос для поиска турниров по ID игрока
+
     @Query(
             value = "SELECT t.* FROM tournament t "
-                    + "JOIN player_tournament pt ON t.id = pt.tournament_id "
-                    + "WHERE pt.player_id = :playerId",
+                    +
+                    "JOIN player_tournament pt ON t.id = pt.tournament_id "
+                    +
+                    "JOIN player p ON pt.player_id = p.id "
+                    +
+                    "WHERE p.name = :name",
             nativeQuery = true
     )
-    List<Tournament> findTournamentsByPlayerId(@Param("playerId") Long playerId);
+    List<Tournament> findTournamentsByName(@Param("name") String name);
 }

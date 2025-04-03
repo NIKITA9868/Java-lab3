@@ -34,10 +34,10 @@ public class TournamentController {
         return ResponseEntity.ok(tournaments);
     }
 
-    @GetMapping("byPlayerId")
-    public ResponseEntity<List<TournamentDto>> getTournamentsByPlayerId(
-            @RequestParam Long playerId) {
-        List<TournamentDto> tournaments = tournamentService.getTournamentsByPlayerId(playerId);
+    @GetMapping("byPlayerName")
+    public ResponseEntity<List<TournamentDto>> getTournamentsByPlayerName(
+            @RequestParam String name) {
+        List<TournamentDto> tournaments = tournamentService.getTournamentsByPlayerId(name);
         return ResponseEntity.ok(tournaments);
     }
 
