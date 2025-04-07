@@ -33,7 +33,7 @@ public class TournamentService {
 
         if (tournaments.isEmpty()) {
             throw new ResourceNotFoundException(
-                    "No tournaments found for player with id: " + name);
+                    "No tournaments found for player with name: " + name);
         }
         // Если нет в кэше, получаем из БД и кэшируем
         return tournaments;
@@ -116,7 +116,7 @@ public class TournamentService {
 
     // Зарегистрировать игрока на турнир
     @Transactional
-    @CacheEvict(value = "tournaments", key = "'player_' + #playerId")
+    @CacheEvict(value = "tournaments", allEntries = true)
     public TournamentDto registerPlayer(Long tournamentId, Long playerId) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -141,7 +141,7 @@ public class TournamentService {
     }
 
     @Transactional
-    @CacheEvict(value = "tournaments", key = "'player_' + #playerId")
+    @CacheEvict(value = "tournaments", allEntries = true)
     public TournamentDto unregisterPlayer(Long tournamentId, Long playerId) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
