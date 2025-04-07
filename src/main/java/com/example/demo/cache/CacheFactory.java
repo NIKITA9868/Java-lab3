@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 public class CacheFactory {
     private final ConfigurableApplicationContext context;
 
+    @SuppressWarnings("unchecked")
     public <K, V> MyCache<K, V> createCache(String cacheName, int maxSize, long timeout) {
         return context.getBean(MyCache.class, cacheName, maxSize, timeout);
     }
