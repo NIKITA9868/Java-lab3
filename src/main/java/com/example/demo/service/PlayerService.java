@@ -84,7 +84,7 @@ public class PlayerService {
     public void deletePlayer(Long playerId) {
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Player not found with id: " + playerId));
+                        PLAYER_NOT_FOUND_MESSAGE + playerId));
 
         List<Tournament> tournaments = tournamentRepository.findTournamentsByName(
                 player.getName());

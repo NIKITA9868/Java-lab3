@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 
 
 
@@ -77,19 +77,20 @@ public class LogController {
     })
     @GetMapping(value = "/date", produces =
         {MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE})
-    public ResponseEntity<?> getLogsByDate(
+    public ResponseEntity<List<String>> getLogsByDate(
             @RequestParam String date
     ) {
         try {
+
             LocalDate targetDate = LocalDate.parse(date, LOG_DATE_FORMAT);
             List<String> logs = filterLogsByDate(targetDate);
             return ResponseEntity.ok(logs);
         } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body("Invalid date format. Use YYYY-MM-DD");
+            return ResponseEntity.badRequest().body(List.of("Invalid date format. Use YYYY-MM-DD"));
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().body("Error reading log file");
+            return ResponseEntity.internalServerError().body(List.of("Error reading log file"));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Internal server error");
+            return ResponseEntity.internalServerError().body(List.of("Internal server error"));
         }
     }
 
@@ -105,7 +106,7 @@ public class LogController {
                             return false;
                         }
                     })
-                    .collect(Collectors.toList());
+                    .toList();
         }
     }
 }

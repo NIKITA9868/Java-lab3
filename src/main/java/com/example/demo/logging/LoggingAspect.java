@@ -26,9 +26,10 @@ public class LoggingAspect {
             logger.info("Метод {}.{}() выполнен успешно", className, methodName);
             return result;
         } catch (Exception e) {
-            logger.error("Ошибка в методе {}.{}(): {}",
-                    className, methodName, e.getMessage(), e);
-            throw e;
+            String errorMessage = String.format("Ошибка в методе %s.%s(): %s",
+                    className, methodName, e.getMessage());
+            logger.error(errorMessage, e);
+            throw new RuntimeException(errorMessage, e); // Wrap with context
         }
     }
 
