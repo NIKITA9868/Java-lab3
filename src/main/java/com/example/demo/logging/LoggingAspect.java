@@ -1,6 +1,5 @@
 package com.example.demo.logging;
 
-import com.example.demo.exception.BadRequestException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -30,7 +29,7 @@ public class LoggingAspect {
             String errorMessage = String.format("Ошибка в методе %s.%s(): %s",
                     className, methodName, e.getMessage());
             logger.error(errorMessage, e);
-            throw new BadRequestException(errorMessage);
+            throw e; // Прокидываем оригинальное исключение
             // Кастомное исключение вместо RuntimeException
         }
     }

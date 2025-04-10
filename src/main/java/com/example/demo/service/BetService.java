@@ -23,7 +23,6 @@ public class BetService {
     private final BetRepository betRepository;
     private final PlayerRepository playerRepository;
 
-
     public List<BetDto> getAllBets() {
         return betRepository.findAll().stream()
                 .map(BetMapperUtils::converttobetdto)
