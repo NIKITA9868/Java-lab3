@@ -20,15 +20,12 @@ public class LoggingAspect {
         LOGGER.info("==> {}.{}() вызван с аргументами: {}",
                 className, methodName, joinPoint.getArgs());
 
-        try {
-            Object result = joinPoint.proceed();
-            LOGGER.info("<== {}.{}() успешно выполнен. Результат: {}",
+
+        Object result = joinPoint.proceed();
+        LOGGER.info("<== {}.{}() успешно выполнен. Результат: {}",
                     className, methodName, result);
-            return result;
-        } catch (Exception e) {
-            LOGGER.error("<== {}.{}() завершился с ошибкой", className, methodName, e);
-            throw e;
-        }
+        return result;
+
 
     }
 }
