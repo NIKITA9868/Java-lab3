@@ -26,9 +26,9 @@ public class LoggingAspect {
                     className, methodName, result);
             return result;
         } catch (Exception e) {
-            LOGGER.error("<== {}.{}() завершился с ошибкой: {}",
-                    className, methodName, e.getMessage());
+            LOGGER.error("<== {}.{}() завершился с ошибкой", className, methodName, e);
             throw e;
         }
+
     }
 }
