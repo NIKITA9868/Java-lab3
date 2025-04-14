@@ -10,7 +10,6 @@ import com.example.demo.repository.BetRepository;
 import com.example.demo.repository.PlayerRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BetService {
     private final BetRepository betRepository;
     private final PlayerRepository playerRepository;
+    private final PlayerCacheService playerCacheService;
 
     public List<BetDto> getAllBets() {
         return betRepository.findAll().stream()
@@ -39,7 +39,7 @@ public class BetService {
                 .toList();
     }
 
-    @CacheEvict(value = "bets", allEntries = true)
+
     public BetDto createBet(Long playerId, BetDto betDto) {
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -56,12 +56,12 @@ public class BetService {
 
         player.setBalance(player.getBalance() - betDto.getAmount());
         playerRepository.save(player);
-
+        playerCacheService.clear();
         Bet savedBet = betRepository.save(bet);
         return BetMapperUtils.converttobetdto(savedBet);
     }
 
-    @CacheEvict(value = "bets", allEntries = true)
+
     public void deleteBet(Long playerId, Long betId) {
         if (!playerRepository.existsById(playerId)) {
             throw new ResourceNotFoundException("Player not found with id: " + playerId);
@@ -75,6 +75,7 @@ public class BetService {
         Player player = bet.getPlayer();
         player.setBalance(player.getBalance() + bet.getAmount());
         playerRepository.save(player);
+        playerCacheService.clear();
 
         betRepository.delete(bet);
     }

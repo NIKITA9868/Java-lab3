@@ -11,8 +11,6 @@ import com.example.demo.repository.TournamentRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,16 +24,17 @@ public class PlayerService {
     private static final String PLAYER_NOT_FOUND_MESSAGE = "Player not found with id: ";
     private final PlayerRepository playerRepository;
     private final TournamentRepository tournamentRepository;
-
+    private final PlayerCacheService playerCacheService;
+    private final TournamentCacheService tournamentCacheService;
 
     @Transactional
-    @Cacheable(value = "bets", key = "#bets")
     public List<PlayerDto> findPlayersWithBetsMoreThan(Long bets) {
 
 
-        List<PlayerDto> result = playerRepository.findPlayersWithBetsGreaterThan(bets).stream()
-                  .map(PlayerMapperUtils::converttodto)
-                  .toList();
+        List<Player> result = playerCacheService.getPlayer(
+                bets,
+                () -> playerRepository.findPlayersWithBetsGreaterThan(bets)// Ленивая загрузка
+        );
 
         if (result.isEmpty()) {
             throw new ResourceNotFoundException(
@@ -43,7 +42,8 @@ public class PlayerService {
                 );
         }
 
-        return result;
+        return result.stream().map(PlayerMapperUtils::converttodto).toList();
+
 
 
     }
@@ -69,10 +69,11 @@ public class PlayerService {
         player.setName(playerDto.getName());
         player.setBalance(playerDto.getBalance());
         Player savedPlayer = playerRepository.save(player);
+        playerCacheService.clear();
         return PlayerMapperUtils.converttodto(savedPlayer);
     }
 
-    @CacheEvict(value = "bets", allEntries = true)
+
     public PlayerDto updatePlayer(Long id, PlayerDto playerDto) {
 
 
@@ -82,12 +83,12 @@ public class PlayerService {
         player.setName(playerDto.getName());
         player.setBalance(playerDto.getBalance());
         Player updatedPlayer = playerRepository.save(player);
-
+        playerCacheService.clear();
+        tournamentCacheService.clear();
         return PlayerMapperUtils.converttodto(updatedPlayer);
     }
 
     @Transactional
-    @CacheEvict(value = {"bets", "tournaments"}, allEntries = true)
     public void deletePlayer(Long playerId) {
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -100,6 +101,9 @@ public class PlayerService {
 
         player.getTournaments().clear();
         player.getBets().clear();
+        playerCacheService.clear();
+        tournamentCacheService.clear();
+
         playerRepository.delete(player);
     }
 

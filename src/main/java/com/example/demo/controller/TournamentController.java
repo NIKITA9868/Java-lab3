@@ -88,7 +88,7 @@ public class TournamentController {
     @GetMapping(value = "/byPlayerName", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TournamentDto>> getTournamentsByPlayerName(
             @RequestParam String name) {
-        List<TournamentDto> tournaments = tournamentService.getTournamentsByPlayerId(name);
+        List<TournamentDto> tournaments = tournamentService.getTournamentsByPlayerName(name);
         return ResponseEntity.ok(tournaments);
     }
 

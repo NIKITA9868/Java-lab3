@@ -10,35 +10,25 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class LoggingAspect {
-    private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingAspect.class);
 
-    // Логирование всех методов в контроллерах
-    @Around("execution(* com.example.demo.controller..*(..))")
+    @Around("execution(* com.example.demo.controller.*.*(..))")
     public Object logControllerMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
 
-        logger.info("Вызов метода: {}.{}() с аргументами: {}",
+        LOGGER.info("==> {}.{}() вызван с аргументами: {}",
                 className, methodName, joinPoint.getArgs());
 
         try {
             Object result = joinPoint.proceed();
-            logger.info("Метод {}.{}() выполнен успешно", className, methodName);
+            LOGGER.info("<== {}.{}() успешно выполнен. Результат: {}",
+                    className, methodName, result);
             return result;
         } catch (Exception e) {
-            String errorMessage = String.format("Ошибка в методе %s.%s(): %s",
+            LOGGER.error("<== {}.{}() завершился с ошибкой: {}",
                     className, methodName, e.getMessage());
-            logger.error(errorMessage, e);
-            throw e; // Прокидываем оригинальное исключение
-            // Кастомное исключение вместо RuntimeException
+            throw e;
         }
-    }
-
-    // Логирование всех методов в сервисах
-    @Around("execution(* com.example.demo.service..*(..))")
-    public Object logServiceMethods(ProceedingJoinPoint joinPoint) throws Throwable {
-        String methodName = joinPoint.getSignature().getName();
-        logger.debug("Сервисный метод {} вызван", methodName);
-        return joinPoint.proceed();
     }
 }
