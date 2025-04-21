@@ -46,7 +46,6 @@ public class TournamentService {
 
     }
 
-    // Получить все турниры
     public List<TournamentDto> getAllTournaments() {
         return tournamentRepository.findAll().stream()
                 .map(TournamentMapperUtils::converttodto)

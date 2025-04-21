@@ -23,7 +23,6 @@ public class MyCache<K, V> {
     private final Map<K, CacheEntry<V>> cache;
     private final ScheduledExecutorService scheduler;
 
-
     private record CacheEntry<V>(V value, long expiryTime) {
     }
 

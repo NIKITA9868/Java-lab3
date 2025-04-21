@@ -93,6 +93,12 @@ public class PlayerController {
         return ResponseEntity.ok(players);
     }
 
+    @PostMapping("/bulk")
+    public ResponseEntity<List<PlayerDto>> createPlayersBulk(
+            @RequestBody List<PlayerDto> playerDtos
+    ) {
+        return ResponseEntity.ok(playerService.createPlayersBulk(playerDtos));
+    }
 
 
     @Operation(

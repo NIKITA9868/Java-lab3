@@ -34,7 +34,9 @@ public class GlobalExceptionHandler {
                 "Validation failed",
                 request.getDescription(false),
                 errors);
-        log.info("Validation failed");
+
+        // Логируем детали ошибки в консоль
+        log.error("Validation errors: {}", errors);  // Важно: используем ERROR-уровень
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
