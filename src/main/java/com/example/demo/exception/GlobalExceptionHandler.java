@@ -1,5 +1,6 @@
 package com.example.demo.exception;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,38 @@ import org.springframework.web.context.request.WebRequest;
 @Log4j2
 @ControllerAdvice // Глобальный обработчик исключений
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(LogNotReadyException.class)
+    public ResponseEntity<ErrorResponse> handleLogNotReady(LogNotReadyException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_EARLY)
+                .body(new ErrorResponse(
+                        "LOG_NOT_READY",
+                        ex.getMessage(),
+                        LocalDateTime.now()
+                ));
+    }
+
+    @ExceptionHandler(LogNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLogNotFound(LogNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(
+                        "LOG_NOT_FOUND",
+                        ex.getMessage(),
+                        LocalDateTime.now()
+                ));
+    }
+
+    @ExceptionHandler(LogProcessingException.class)
+    public ResponseEntity<ErrorResponse> handleLogProcessingFailed(LogProcessingException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(
+                        "LOG_PROCESSING_FAILED",
+                        ex.getMessage(),
+                        LocalDateTime.now()
+                ));
+    }
+
+    record ErrorResponse(String code, String message, LocalDateTime timestamp) {}
 
     // Новый метод для обработки ошибок валидации
     @ExceptionHandler(MethodArgumentNotValidException.class)

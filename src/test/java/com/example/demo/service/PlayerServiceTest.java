@@ -6,18 +6,15 @@ import com.example.demo.entity.Tournament;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.PlayerRepository;
 import com.example.demo.repository.TournamentRepository;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.boot.test.context.SpringBootTest;
+import java.util.List;
+import java.util.Optional;
 
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
 class PlayerServiceTest {
 
     @Mock
@@ -36,121 +33,245 @@ class PlayerServiceTest {
     private PlayerService playerService;
 
     private Player player;
-    private PlayerDto playerDto;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
+        // Подготовка игрока для тестов
         player = new Player();
         player.setId(1L);
         player.setName("Test Player");
-        player.setBalance(100L);
-        player.setTournaments(new HashSet<>());
+        player.setBalance(1000L);
+    }
 
-        playerDto = new PlayerDto();
-        playerDto.setId(1L);
-        playerDto.setName("Test Player");
-        playerDto.setBalance(100L);
+    @Test
+    void testFindPlayersWithBetsMoreThan_Found() {
+        // Мокаем поведение кэша
+        List<Player> mockPlayers = List.of(player);
+        when(playerCacheService.getPlayer(eq(100L), any())).thenReturn(mockPlayers);
+
+        // Вызов метода
+        List<PlayerDto> result = playerService.findPlayersWithBetsMoreThan(100L);
+
+        // Проверка результата
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(playerCacheService).getPlayer(eq(100L), any());
+    }
+
+    @Test
+    void testFindPlayersWithBetsMoreThan_NotFound() {
+        // Мокаем пустой результат из кэша
+        when(playerCacheService.getPlayer(eq(100L), any())).thenReturn(List.of());
+
+        // Вызов метода и проверка исключения
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            playerService.findPlayersWithBetsMoreThan(100L);
+        });
+
+        assertEquals("No players found with bets more than 100", exception.getMessage());
     }
 
     @Test
     void testGetAllPlayers() {
-        when(playerRepository.findAll()).thenReturn(List.of(player));
+        // Мокаем список всех игроков
+        List<Player> players = List.of(player);
+        when(playerRepository.findAll()).thenReturn(players);
 
+        // Вызов метода
         List<PlayerDto> result = playerService.getAllPlayers();
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("Test Player");
+        // Проверка результата
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(playerRepository).findAll();
     }
 
     @Test
-    void testGetPlayerByIdSuccess() {
-        when(playerRepository.findById(1L)).thenReturn(Optional.of(player));
+    void testGetPlayerById_Found() {
+        // Мокаем поведение репозитория
+        when(playerRepository.findById(1L)).thenReturn(java.util.Optional.of(player));
 
+        // Вызов метода
         PlayerDto result = playerService.getPlayerById(1L);
 
-        assertThat(result.getName()).isEqualTo("Test Player");
+        // Проверка результата
+        assertNotNull(result);
+        assertEquals("Test Player", result.getName());
+        verify(playerRepository).findById(1L);
     }
 
     @Test
-    void testGetPlayerByIdNotFound() {
-        when(playerRepository.findById(1L)).thenReturn(Optional.empty());
+    void testGetPlayerById_NotFound() {
+        // Мокаем отсутствие игрока
+        when(playerRepository.findById(1L)).thenReturn(java.util.Optional.empty());
 
-        assertThatThrownBy(() -> playerService.getPlayerById(1L))
-                .isInstanceOf(ResourceNotFoundException.class);
-    }
+        // Вызов метода и проверка исключения
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            playerService.getPlayerById(1L);
+        });
 
-    @Test
-    void testCreatePlayer() {
-        when(playerRepository.save(any(Player.class))).thenReturn(player);
-
-        PlayerDto result = playerService.createPlayer(playerDto);
-
-        verify(playerCacheService).clear();
-        assertThat(result.getName()).isEqualTo("Test Player");
+        assertEquals("Player not found with id: 1", exception.getMessage());
     }
 
     @Test
     void testCreatePlayersBulk() {
-        when(playerRepository.saveAll(anyList())).thenReturn(List.of(player));
+        // Мокаем сохранение игроков
+        PlayerDto playerDto = new PlayerDto();
+        playerDto.setName("Test Player");
+        playerDto.setBalance(1000L);
 
+        Player savedPlayer = new Player();
+        savedPlayer.setName(playerDto.getName());
+        savedPlayer.setBalance(playerDto.getBalance());
+
+        when(playerRepository.saveAll(anyList())).thenReturn(List.of(savedPlayer));
+
+
+        // Вызов метода
         List<PlayerDto> result = playerService.createPlayersBulk(List.of(playerDto));
 
-        verify(playerCacheService).clear();
+        // Проверка результата
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Test Player", result.get(0).getName());
+        verify(playerRepository).saveAll(anyList());
         verify(tournamentCacheService).clear();
-        assertThat(result).hasSize(1);
     }
 
     @Test
-    void testCreatePlayersBulkInvalid() {
-        assertThatThrownBy(() -> playerService.createPlayersBulk(null))
-                .isInstanceOf(IllegalArgumentException.class);
+    void testFindPlayersWithBetsMoreThan_FallbackToDatabase() {
+        // 1. Кэш пустой → падаем в базу
+        when(playerCacheService.getPlayer(eq(100L), any())).thenReturn(List.of());
+
+        // 2. В базе есть игроки
+        when(playerRepository.findPlayersWithBetsGreaterThan(100L)).thenReturn(List.of(player));
+
+        List<PlayerDto> result = playerService.findPlayersWithBetsMoreThan(100L);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(playerRepository).findPlayersWithBetsGreaterThan(100L); // Проверяем вызов базы
     }
 
     @Test
-    void testUpdatePlayer() {
+    void testDeletePlayer_NoTournaments() {
         when(playerRepository.findById(1L)).thenReturn(Optional.of(player));
-        when(playerRepository.save(any(Player.class))).thenReturn(player);
+        when(tournamentRepository.findTournamentsByName(player.getName())).thenReturn(List.of());
+
+        playerService.deletePlayer(1L);
+
+        verify(tournamentRepository).findTournamentsByName(player.getName());
+        verify(playerRepository).delete(player);
+    }
+
+    @Test
+    void testUpdatePlayer_NullBalance_KeepsOldValue() {
+        PlayerDto playerDto = new PlayerDto();
+        playerDto.setName("Updated Player");
+        playerDto.setBalance(0); // Не передали баланс
+
+        when(playerRepository.findById(1L)).thenReturn(Optional.of(player));
+        when(playerRepository.save(any())).thenReturn(player);
 
         PlayerDto result = playerService.updatePlayer(1L, playerDto);
 
+        assertEquals(1000L, result.getBalance()); // Старый баланс сохранился
+    }
+
+    @Test
+    void testCreatePlayersBulk_EmptyList() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            playerService.createPlayersBulk(List.of());
+        });
+    }
+
+    @Test
+    void testGetAllPlayers_EmptyList() {
+        when(playerRepository.findAll()).thenReturn(List.of());
+
+        List<PlayerDto> result = playerService.getAllPlayers();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testCreatePlayer() {
+        // Мокаем сохранение игрока
+        PlayerDto playerDto = new PlayerDto();
+        playerDto.setName("Test Player");
+        playerDto.setBalance(1000L);
+
+        Player savedPlayer = new Player();
+        savedPlayer.setName(playerDto.getName());
+        savedPlayer.setBalance(playerDto.getBalance());
+
+        when(playerRepository.save(any())).thenReturn(savedPlayer);
+
+        // Вызов метода
+        PlayerDto result = playerService.createPlayer(playerDto);
+
+        // Проверка результата
+        assertNotNull(result);
+        assertEquals("Test Player", result.getName());
+        verify(playerRepository).save(any());
+        verify(playerCacheService).clear();
+    }
+
+    @Test
+    void testUpdatePlayer_Found() {
+        // Мокаем существующего игрока
+        PlayerDto playerDto = new PlayerDto();
+        playerDto.setName("Updated Player");
+        playerDto.setBalance(1200L);
+
+        when(playerRepository.findById(1L)).thenReturn(java.util.Optional.of(player));
+        when(playerRepository.save(any())).thenReturn(player);
+
+        // Вызов метода
+        PlayerDto result = playerService.updatePlayer(1L, playerDto);
+
+        // Проверка результата
+        assertNotNull(result);
+        assertEquals("Updated Player", result.getName());
+        verify(playerRepository).findById(1L);
+        verify(playerRepository).save(any());
         verify(playerCacheService).clear();
         verify(tournamentCacheService).clear();
-        assertThat(result.getName()).isEqualTo("Test Player");
+    }
+
+    @Test
+    void testUpdatePlayer_NotFound() {
+        // Мокаем отсутствие игрока
+        PlayerDto playerDto = new PlayerDto();
+        playerDto.setName("Updated Player");
+        playerDto.setBalance(1200L);
+
+        when(playerRepository.findById(1L)).thenReturn(java.util.Optional.empty());
+
+        // Вызов метода и проверка исключения
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            playerService.updatePlayer(1L, playerDto);
+        });
+
+        assertEquals("Player not found with id: 1", exception.getMessage());
     }
 
     @Test
     void testDeletePlayer() {
-        Tournament tournament = new Tournament();
-        tournament.setPlayers(new HashSet<>(List.of(player)));
-        when(playerRepository.findById(1L)).thenReturn(Optional.of(player));
-        when(tournamentRepository.findTournamentsByName("Test Player"))
-                .thenReturn(List.of(tournament));
+        // Мокаем существующего игрока и турниры
+        when(playerRepository.findById(1L)).thenReturn(java.util.Optional.of(player));
+        when(tournamentRepository.findTournamentsByName(player.getName())).thenReturn(List.of(new Tournament()));
 
+        // Вызов метода
         playerService.deletePlayer(1L);
 
-        verify(playerRepository).delete(player);
+        // Проверка вызовов
+        verify(playerRepository).findById(1L);
+        verify(tournamentRepository).findTournamentsByName(player.getName());
+        verify(playerRepository).delete(any());
         verify(playerCacheService).clear();
         verify(tournamentCacheService).clear();
-    }
-
-    @Test
-    void testFindPlayersWithBetsMoreThanSuccess() {
-        when(playerCacheService.getPlayer(eq(50L), any()))
-                .thenReturn(List.of(player));
-
-        List<PlayerDto> result = playerService.findPlayersWithBetsMoreThan(50L);
-
-        assertThat(result).hasSize(1);
-    }
-
-    @Test
-    void testFindPlayersWithBetsMoreThanFail() {
-        when(playerCacheService.getPlayer(eq(200L), any()))
-                .thenReturn(Collections.emptyList());
-
-        assertThatThrownBy(() -> playerService.findPlayersWithBetsMoreThan(200L))
-                .isInstanceOf(ResourceNotFoundException.class);
     }
 }

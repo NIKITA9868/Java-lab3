@@ -64,12 +64,11 @@ public class PlayerService {
 
     @Transactional
     public List<PlayerDto> createPlayersBulk(List<PlayerDto> playerDtos) {
-        // Валидация входных данных
+
         if (playerDtos == null || playerDtos.isEmpty()) {
             throw new IllegalArgumentException("Player list cannot be null or empty");
         }
 
-        // Преобразование DTO в сущности и сохранение
         List<Player> players = playerDtos.stream()
                 .map(dto -> {
                     Player player = new Player();
@@ -79,12 +78,12 @@ public class PlayerService {
                 })
                 .toList();
 
-        List<Player> savedPlayers = playerRepository.saveAll(players); // Один запрос к БД
+        List<Player> savedPlayers = playerRepository.saveAll(players);
 
         playerCacheService.clear();
         tournamentCacheService.clear();
 
-        // Возврат DTO
+
         return savedPlayers.stream()
                 .map(PlayerMapperUtils::converttodto)
                 .toList();
